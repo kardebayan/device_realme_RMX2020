@@ -1,10 +1,21 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
- * SPDX-License-Identifier: Apache-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#pragma once
+#ifndef ANDROID_HARDWARE_BIOMETRICS_FINGERPRINT_V2_1_BIOMETRICSFINGERPRINT_H
+#define ANDROID_HARDWARE_BIOMETRICS_FINGERPRINT_V2_1_BIOMETRICSFINGERPRINT_H
 
 #include <log/log.h>
 #include <android/log.h>
@@ -34,7 +45,7 @@ using ::android::OK;
 using ::android::sp;
 using ::android::status_t;
 
-class OplusClientCallback;
+class OppoClientCallback;
 struct BiometricsFingerprint : public IBiometricsFingerprint {
 public:
     BiometricsFingerprint();
@@ -50,21 +61,11 @@ public:
     Return<RequestStatus> remove(uint32_t gid, uint32_t fid) override;
     Return<RequestStatus> setActiveGroup(uint32_t gid, const hidl_string& storePath) override;
     Return<RequestStatus> authenticate(uint64_t operationId, uint32_t gid) override;
-    Return<RequestStatus> cleanUp();
-    Return<RequestStatus> pauseEnroll();
-    Return<RequestStatus> continueEnroll();
-    Return<RequestStatus> setTouchEventListener();
-    Return<RequestStatus> dynamicallyConfigLog(uint32_t on);
-    Return<RequestStatus> pauseIdentify();
-    Return<RequestStatus> continueIdentify();
-    Return<RequestStatus> getAlikeyStatus();
-    Return<RequestStatus> getEnrollmentTotalTimes();
-    Return<RequestStatus> getEngineeringInfo(uint32_t type);
 
 private:
-    sp<vendor::oplus::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint> mOplusBiometricsFingerprint;
-    sp<OplusClientCallback> mOplusClientCallback;
-    static Return<RequestStatus> OplusToAOSPRequestStatus(vendor::oplus::hardware::biometrics::fingerprint::V2_1::RequestStatus req);
+    sp<vendor::oplus::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint> mOppoBiometricsFingerprint;
+    sp<OppoClientCallback> mOppoClientCallback;
+    static Return<RequestStatus> OppoToAOSPRequestStatus(vendor::oplus::hardware::biometrics::fingerprint::V2_1::RequestStatus req);
 };
 
 }  // namespace implementation
@@ -73,3 +74,5 @@ private:
 }  // namespace biometrics
 }  // namespace hardware
 }  // namespace android
+
+#endif  // ANDROID_HARDWARE_BIOMETRICS_FINGERPRINT_V2_1_BIOMETRICSFINGERPRINT_H
