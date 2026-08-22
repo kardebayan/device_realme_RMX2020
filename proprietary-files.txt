@@ -7,7 +7,9 @@ vendor/lib64/libadsprpc.so;DISABLE_DEPS
 vendor/lib64/libudf.so|f57a4f63592b62c2de72b377021327756fc5fac1
 
 # AEE
+vendor/lib/libaedv.so
 vendor/lib/libladder.so
+vendor/lib64/libaedv.so
 vendor/lib64/libladder.so
 
 # Audio

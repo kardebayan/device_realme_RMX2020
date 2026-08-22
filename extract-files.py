@@ -29,7 +29,6 @@ namespace_imports = [
     'device/realme/RMX2020',
     'hardware/mediatek',
     'hardware/mediatek/libmtkperf_client',
-    'hardware/mediatek/libaedv',
 ]
 
 
