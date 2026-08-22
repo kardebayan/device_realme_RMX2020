@@ -6,12 +6,6 @@ vendor/lib64/libadsprpc.so;DISABLE_DEPS
 # AEE - from Redmi/ares/ares:12/SP1A.210812.016/21.11.8:user/release-keys
 vendor/lib64/libudf.so|f57a4f63592b62c2de72b377021327756fc5fac1
 
-# AEE
-vendor/lib/libaedv.so
-vendor/lib/libladder.so
-vendor/lib64/libaedv.so
-vendor/lib64/libladder.so
-
 # Audio
 vendor/lib/hw/audio.primary.mt6768.so
 vendor/lib/libMtkSpeechEnh.so
