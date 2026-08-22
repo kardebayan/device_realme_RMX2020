@@ -1485,8 +1485,6 @@ vendor/lib64/libwapi.so
 
 # WiFi - from Redmi/merlin/merlin:11/RP1A.200720.011/V12.0.5.0.RJOCNXM:user/release-keys
 vendor/bin/stp_dump3|73ff60240688d76fc005a59716db1bdcdf63627f
-vendor/bin/wlan_assistant|79b03b7525d0cd46f1235787d532acfc628951f4
 vendor/bin/wmt_launcher|d11c065c19a322f61821ad78ba7d27e8ded3dacb
 vendor/bin/wmt_loader|e095e09057aab66d5d59200189a01e7247c3fabe
-vendor/etc/init/wlan_assistant.rc|32ed0c40b58acc747c83bf467dde7f72634e9732
 vendor/lib64/libwifitest.so|e3eebbde7e588375ea4f1eb03e0e60cc8a396142

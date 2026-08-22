@@ -374,6 +374,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     hostapd \
+    wlan_assistant \
     wpa_supplicant
 
 PRODUCT_PACKAGES += \
