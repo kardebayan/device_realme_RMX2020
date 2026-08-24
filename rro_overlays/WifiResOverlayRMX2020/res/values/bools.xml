@@ -26,4 +26,7 @@
 
     <!-- Disable WPA2 to WPA3 auto-upgrade -->
     <bool translatable="false" name="config_wifiSaeUpgradeEnabled">false</bool>
+
+    <!-- Wifi driver supports 5GHz band for softap when chip support 5GHz -->
+    <bool translatable="false" name="config_wifiSoftap5ghzSupported">false</bool>
 </resources>
