@@ -5,8 +5,6 @@
 
 package org.lineageos.settings.doze
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -27,17 +25,6 @@ class DozeSettingsFragment : PreferenceFragment(), Preference.OnPreferenceChange
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.doze_settings)
-
-        val prefs = activity.getSharedPreferences("doze_settings", Activity.MODE_PRIVATE)!!
-        if (savedInstanceState == null && !prefs.getBoolean("first_help_shown", false)) {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.doze_settings_help_title)
-                .setMessage(R.string.doze_settings_help_text)
-                .setNegativeButton(R.string.dialog_ok) { _, _ ->
-                    prefs.edit().putBoolean("first_help_shown", true).apply()
-                }
-                .show()
-        }
 
         val dozeEnabled = Utils.isDozeEnabled(context)
         switchBar = findPreference(Utils.DOZE_ENABLE)!!
