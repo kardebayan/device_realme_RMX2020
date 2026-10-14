@@ -8,6 +8,8 @@
 # Fingerprint
 /dev/esfp0                                                                                                u:object_r:fp_device:s0
 /dev/silead_fp                                                                                            u:object_r:fp_device:s0
+/data/vendor/fingerprint(/.*)?                                                                            u:object_r:fingerprint_vendor_data_file:s0
+/mnt/vendor/persist/fingerprint(/.*)?                                                                     u:object_r:vendor_persist_fingerprint_file:s0
 
 # Latency
 /dev/cpu_dma_latency                                                                                      u:object_r:latency_device:s0
