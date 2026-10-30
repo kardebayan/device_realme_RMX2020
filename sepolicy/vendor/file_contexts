@@ -2,13 +2,13 @@
 /dev/sia81xx_tuning_if 	                                                                                  u:object_r:sia81xx_tuning_if_device:s0
 
 # Biometrics
-/(vendor|system/vendor)/bin/hw/android\.hardware\.biometrics\.fingerprint@2\.1-service\.RMX2020           u:object_r:hal_fingerprint_default_exec:s0
-/(vendor|odm)/bin/hw/vendor\.oplus\.hardware\.biometrics\.fingerprint@2\.1-service                        u:object_r:hal_fingerprint_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.RMX2020             u:object_r:hal_fingerprint_default_exec:s0
 
 # Fingerprint
 /dev/esfp0                                                                                                u:object_r:fp_device:s0
 /dev/silead_fp                                                                                            u:object_r:fp_device:s0
 /data/vendor/fingerprint(/.*)?                                                                            u:object_r:fingerprint_vendor_data_file:s0
+/data/vendor/silead(/.*)?                                                                                 u:object_r:fingerprint_vendor_data_file:s0
 /mnt/vendor/persist/fingerprint(/.*)?                                                                     u:object_r:vendor_persist_fingerprint_file:s0
 
 # Latency

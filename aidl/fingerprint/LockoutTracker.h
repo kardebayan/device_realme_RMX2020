@@ -9,6 +9,7 @@
 
 #include <android/binder_to_string.h>
 #include <stdint.h>
+#include <sstream>
 #include <string>
 
 #define LOCKOUT_TIMED_THRESHOLD 5

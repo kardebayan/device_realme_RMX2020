@@ -6,3 +6,25 @@ service vendor.fingerprint-default /vendor/bin/hw/android.hardware.biometrics.fi
     user system
     group system input uhid
     shutdown critical
+    # Only started on the fingerprint SKU, see libinit.
+    disabled
+
+on property:persist.vendor.fingerprint.available=true
+    enable vendor.fingerprint-default
+
+on boot
+    # Egis ET520
+    chown system system /dev/esfp0
+    chmod 0660 /dev/esfp0
+
+    # Silead GSL6150
+    chown system system /dev/silead_fp
+    chmod 0660 /dev/silead_fp
+
+on post-fs-data
+    mkdir /data/vendor/fingerprint 0770 system system
+    mkdir /mnt/vendor/persist/fingerprint 0770 system system
+
+    # Silead GSL6150
+    mkdir /data/vendor/silead 0770 system system
+    mkdir /mnt/vendor/persist/fingerprint/silead 0770 system system

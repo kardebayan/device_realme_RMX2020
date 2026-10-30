@@ -6,46 +6,34 @@
  */
 
 #include "Fingerprint.h"
+#include "EgisFingerprint.h"
 
-#include <android-base/properties.h>
-#include <fingerprint.sysprop.h>
-#include <util/Util.h>
-
+#include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/strings.h>
 
 namespace aidl::android::hardware::biometrics::fingerprint {
 
 namespace {
+constexpr int SENSOR_ID = 0;
+constexpr common::SensorStrength SENSOR_STRENGTH = common::SensorStrength::STRONG;
 constexpr int MAX_ENROLLMENTS_PER_USER = 5;
 constexpr char HW_COMPONENT_ID[] = "fingerprintSensor";
-constexpr char HW_VERSION[] = "vendor/model/revision";
-constexpr char FW_VERSION[] = "1.01";
-constexpr char SERIAL_NUMBER[] = "00000001";
 constexpr char SW_COMPONENT_ID[] = "matchingAlgorithm";
-constexpr char SW_VERSION[] = "vendor/version/revision";
+
+// The kernel exposes the probed sensor (chip-name in the device tree) here.
+constexpr char FP_ID_PATH[] = "/proc/fp_id";
+constexpr char FP_ID_EGIS_ET520[] = "E_520";
+constexpr char FP_ID_SILEAD_GSL6150[] = "S_gsl6150";
+
+constexpr char SILEAD_MODULE_ID[] = "fingerprint.silead";
 }  // namespace
 
 static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(2, 1);
 static Fingerprint* sInstance;
 
-Fingerprint::Fingerprint(std::shared_ptr<FingerprintConfig> config)
-    : mConfig(std::move(config)), mDevice(openHal()) {
+Fingerprint::Fingerprint() : mDevice(openHal()) {
     sInstance = this;  // keep track of the most recent instance
-
-    std::string sensorTypeProp = mConfig->get<std::string>("type");
-    if (sensorTypeProp == "side") {
-        mSensorType = FingerprintSensorType::POWER_BUTTON;
-    } else if (sensorTypeProp == "home") {
-        mSensorType = FingerprintSensorType::HOME_BUTTON;
-    } else if (sensorTypeProp == "rear") {
-        mSensorType = FingerprintSensorType::REAR;
-    } else {
-        mSensorType = FingerprintSensorType::UNKNOWN;
-        UNIMPLEMENTED(FATAL) << "unrecognized or unimplemented fingerprint behavior: "
-                             << sensorTypeProp;
-    }
-    ALOGI("sensorTypeProp: %s", sensorTypeProp.c_str());
 }
 
 Fingerprint::~Fingerprint() {
@@ -62,11 +50,11 @@ Fingerprint::~Fingerprint() {
     mDevice = nullptr;
 }
 
-fingerprint_device_t* Fingerprint::openHal() {
+static fingerprint_device_t* openSileadHal() {
     int err;
     const hw_module_t* hw_mdl = nullptr;
-    ALOGD("Opening fingerprint hal library...");
-    if (0 != (err = hw_get_module(FINGERPRINT_HARDWARE_MODULE_ID, &hw_mdl))) {
+    ALOGD("Opening silead fingerprint hal library...");
+    if (0 != (err = hw_get_module(SILEAD_MODULE_ID, &hw_mdl))) {
         ALOGE("Can't open fingerprint HW Module, error: %d", err);
         return nullptr;
     }
@@ -90,53 +78,43 @@ fingerprint_device_t* Fingerprint::openHal() {
     }
 
     if (kVersion != device->version) {
-        // enforce version on new devices because of HIDL@2.1 translation layer
         ALOGE("Wrong fp version. Expected %d, got %d", kVersion, device->version);
         return nullptr;
     }
 
-    fingerprint_device_t* fp_device = reinterpret_cast<fingerprint_device_t*>(device);
+    return reinterpret_cast<fingerprint_device_t*>(device);
+}
 
+fingerprint_device_t* Fingerprint::openHal() {
+    std::string fpId;
+    if (!::android::base::ReadFileToString(FP_ID_PATH, &fpId)) {
+        ALOGE("Can't read %s", FP_ID_PATH);
+        return nullptr;
+    }
+    mSensorId = ::android::base::Trim(fpId);
+    ALOGI("Fingerprint sensor: %s", mSensorId.c_str());
+
+    fingerprint_device_t* fp_device;
+    if (mSensorId == FP_ID_SILEAD_GSL6150) {
+        fp_device = openSileadHal();
+    } else if (mSensorId == FP_ID_EGIS_ET520) {
+        fp_device = egis::open();
+    } else {
+        ALOGE("Unsupported fingerprint sensor: %s", mSensorId.c_str());
+        return nullptr;
+    }
+
+    if (fp_device == nullptr) {
+        return nullptr;
+    }
+
+    int err;
     if (0 != (err = fp_device->set_notify(fp_device, Fingerprint::notify))) {
         ALOGE("Can't register fingerprint module callback, error: %d", err);
         return nullptr;
     }
 
     return fp_device;
-}
-
-std::vector<SensorLocation> Fingerprint::getSensorLocations() {
-    std::vector<SensorLocation> locations;
-
-    auto loc = mConfig->get<std::string>("sensor_location");
-    auto entries = ::android::base::Split(loc, ",");
-
-    for (const auto& entry : entries) {
-        auto isValidStr = false;
-        auto dim = ::android::base::Split(entry, "|");
-
-        if (dim.size() != 3 and dim.size() != 4) {
-            if (!loc.empty()) {
-                ALOGE("Invalid sensor location input (x|y|radius) or (x|y|radius|display): %s",
-                      loc.c_str());
-            }
-        } else {
-            int32_t x, y, r;
-            std::string d;
-            isValidStr = ParseInt(dim[0], &x) && ParseInt(dim[1], &y) && ParseInt(dim[2], &r);
-            if (dim.size() == 4) {
-                d = dim[3];
-                isValidStr = isValidStr && !d.empty();
-            }
-            if (isValidStr)
-                locations.push_back({.sensorLocationX = x,
-                                     .sensorLocationY = y,
-                                     .sensorRadius = r,
-                                     .display = d});
-        }
-    }
-
-    return locations;
 }
 
 void Fingerprint::notify(const fingerprint_msg_t* msg) {
@@ -150,30 +128,19 @@ void Fingerprint::notify(const fingerprint_msg_t* msg) {
 
 ndk::ScopedAStatus Fingerprint::getSensorProps(std::vector<SensorProps>* out) {
     std::vector<common::ComponentInfo> componentInfo = {
-            {HW_COMPONENT_ID, HW_VERSION, FW_VERSION, SERIAL_NUMBER, "" /* softwareVersion */},
+            {HW_COMPONENT_ID, mSensorId /* hardwareVersion */, "" /* firmwareVersion */,
+             "" /* serialNumber */, "" /* softwareVersion */},
             {SW_COMPONENT_ID, "" /* hardwareVersion */, "" /* firmwareVersion */,
-             "" /* serialNumber */, SW_VERSION}};
-    auto sensorId = mConfig->get<std::int32_t>("sensor_id");
-    auto sensorStrength = mConfig->get<std::int32_t>("sensor_strength");
-    auto navigationGuesture = mConfig->get<bool>("navigation_gesture");
-    auto detectInteraction = mConfig->get<bool>("detect_interaction");
+             "" /* serialNumber */, mSensorId /* softwareVersion */}};
 
-    common::CommonProps commonProps = {sensorId, (common::SensorStrength)sensorStrength,
-                                       MAX_ENROLLMENTS_PER_USER, componentInfo};
+    common::CommonProps commonProps = {SENSOR_ID, SENSOR_STRENGTH, MAX_ENROLLMENTS_PER_USER,
+                                       componentInfo};
 
-    std::vector<SensorLocation> sensorLocations = getSensorLocations();
-
-    std::vector<std::string> sensorLocationStrings;
-    std::transform(sensorLocations.begin(), sensorLocations.end(),
-                   std::back_inserter(sensorLocationStrings),
-                   [](const SensorLocation& obj) { return obj.toString(); });
-
-    ALOGI("sensor id: %d, type: %s, location: %s", sensorId,
-          ::android::internal::ToString(mSensorType).c_str(),
-          ::android::base::Join(sensorLocationStrings, ", ").c_str());
-
-    *out = {{commonProps, mSensorType, sensorLocations, navigationGuesture, detectInteraction,
-             false, false, std::nullopt}};
+    // Capacitive sensor on the back panel.
+    *out = {{commonProps, FingerprintSensorType::REAR, {} /* sensorLocations */,
+             false /* supportsNavigationGestures */, false /* supportsDetectInteraction */,
+             false /* halHandlesDisplayTouches */, false /* halControlsIllumination */,
+             std::nullopt /* touchDetectionParameters */}};
     return ndk::ScopedAStatus::ok();
 }
 

@@ -881,39 +881,9 @@ vendor/lib64/vendor.mediatek.hardware.pq@2.5.so
 vendor/lib64/vendor.mediatek.hardware.pq@2.6.so
 
 # Fingerprint
-odm/bin/hw/vendor.oplus.hardware.biometrics.fingerprint@2.1-service
-odm/etc/init/vendor.oplus.hardware.biometrics.fingerprint@2.1-service.rc|28c3a9b37ccbe6af6f023db41d301854ac2538ad
-odm/lib/hw/fingerprint.goodix_G2.default.so
-odm/lib/hw/fingerprint.goodix_G3.default.so
-odm/lib/hw/fingerprint.goodix_G5.default.so
-odm/lib/hw/fingerprint.goodix_G6.default.so
-odm/lib/hw/fingerprint.silead.default.so
-odm/lib/libRbsFlow.so
-odm/lib/libRbsFlow_cap.so
-odm/lib/libgf_hal_G2.so
-odm/lib/libgf_hal_G3.so
-odm/lib/libgf_hal_G5.so
-odm/lib/libgf_hal_G6.so
-odm/lib/libsl_fp_impl.so
-odm/lib/vendor.oplus.hardware.biometrics.fingerprint@2.1.so;MODULE_SUFFIX=_odm
-odm/lib/vendor.oplus.hardware.biometrics.fingerprintservice@1.0.so
-odm/lib/vendor.oplus.hardware.commondcs@1.0.so
-odm/lib64/hw/fingerprint.goodix_G2.default.so
-odm/lib64/hw/fingerprint.goodix_G3.default.so
-odm/lib64/hw/fingerprint.goodix_G5.default.so
-odm/lib64/hw/fingerprint.goodix_G6.default.so
 odm/lib64/hw/fingerprint.silead.default.so
-odm/lib64/libRbsFlow.so
 odm/lib64/libRbsFlow_cap.so
-odm/lib64/libegis_hal.so
-odm/lib64/libgf_hal_G2.so
-odm/lib64/libgf_hal_G3.so
-odm/lib64/libgf_hal_G5.so
-odm/lib64/libgf_hal_G6.so
 odm/lib64/libsl_fp_impl.so
-odm/lib64/vendor.oplus.hardware.biometrics.fingerprint@2.1.so;MODULE_SUFFIX=_odm
-odm/lib64/vendor.oplus.hardware.biometrics.fingerprintservice@1.0.so
-odm/lib64/vendor.oplus.hardware.commondcs@1.0.so
 
 # Firmware
 vendor/firmware/WIFI_RAM_CODE_soc1_0_1a_1.bin

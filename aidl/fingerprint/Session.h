@@ -14,6 +14,8 @@
 #include <hardware/hardware.h>
 #include <log/log.h>
 
+#include <mutex>
+
 #include "LockoutTracker.h"
 
 using ::aidl::android::hardware::biometrics::common::ICancellationSignal;
@@ -69,9 +71,13 @@ class Session : public BnSession {
     LockoutTracker mLockoutTracker;
     bool mClosed = false;
 
-    // static ndk::ScopedAStatus ErrorFilter(int32_t error);
+    static Error HalErrorFilter(int error);
     static Error VendorErrorFilter(int32_t error, int32_t* vendorCode);
     static AcquiredInfo VendorAcquiredFilter(int32_t info, int32_t* vendorCode);
+
+    int authenticateAsType(uint64_t operationId);
+    void onTemplatesSynced(const fingerprint_msg_t* msg);
+    void onTemplatesReported(const std::vector<int32_t>& templates);
 
     bool checkSensorLockout();
     void clearLockout(bool clearAttemptCounter);
@@ -81,6 +87,14 @@ class Session : public BnSession {
     // lockout timer
     bool mIsLockoutTimerStarted = false;
     bool mIsLockoutTimerAborted = false;
+
+    // The vendor HALs report the whole template list on their own (after setting the active
+    // group, enrolling or removing), so keep the latest one around for enumerateEnrollments().
+    std::mutex mTemplatesLock;
+    std::vector<int32_t> mTemplates;
+    bool mEnumeratePending = false;
+    // Templates collected from FINGERPRINT_TEMPLATE_ENUMERATING messages so far.
+    std::vector<int32_t> mEnumerated;
 
     // The user ID for which this session was created.
     int32_t mUserId;

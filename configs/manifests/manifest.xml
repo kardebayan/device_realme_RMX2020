@@ -213,11 +213,6 @@
         <fqname>@1.0::IVideoTelephony/default</fqname>
     </hal>
     <hal format="hidl">
-        <name>vendor.oplus.hardware.biometrics.fingerprint</name>
-        <transport>hwbinder</transport>
-        <fqname>@2.1::IBiometricsFingerprint/default</fqname>
-    </hal>
-    <hal format="hidl">
         <name>vendor.trustonic.tee</name>
         <transport>hwbinder</transport>
         <fqname>@1.1::ITee/default</fqname>
